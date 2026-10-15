@@ -31,121 +31,89 @@ const Login = ({ setIsLoggedIn }) => {
     try {
       await api.post('/customers/login', formData);
       setIsLoggedIn(true);
-      // Login successful, redirect to home
       navigate('/home');
     } catch (err) {
-      // The backend returns 401 for invalid credentials
-      setError(err.response?.data?.message || 'Invalid Credentials');
+      setError(err.response?.data?.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50/50 relative overflow-hidden">
-      {/* Decorative background blobs */}
-      <div className="absolute top-1/4 -left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-      <div className="absolute top-1/4 -right-10 w-72 h-72 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative">
-        <div className="flex justify-center mb-4">
-          <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-             <span className="text-white font-bold text-3xl leading-none">S</span>
-          </div>
-        </div>
-        <h2 className="text-center text-3xl font-extrabold text-gray-900 tracking-tight">
-          Welcome back
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-            Sign up for free
+    <div className="min-h-[calc(100vh-6rem)] flex flex-col justify-center py-10 px-4 sm:px-6">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        
+        {/* Logo */}
+        <div className="text-center mb-6">
+          <Link to="/products" className="inline-flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#84cc16] to-[#4d7c0f] flex items-center justify-center font-black text-black text-xl shadow-[0_4px_0_#2b3a1a]">
+              ⚡
+            </div>
+            <span className="font-black text-3xl tracking-tight text-white">
+              SHOP<span className="text-[#84cc16]">KART</span>
+            </span>
           </Link>
-        </p>
-      </div>
+        </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative">
-        <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl sm:rounded-2xl sm:px-10 border border-gray-100">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md animate-fade-in">
-                <div className="flex">
-                  <div className="ml-3">
-                    <p className="text-sm text-red-700">{error}</p>
-                  </div>
-                </div>
-              </div>
-            )}
+        {/* 3D Login Card */}
+        <div className="bento-3d p-8 shadow-2xl">
+          <span className="badge-olive px-2.5 py-0.5 rounded text-[10px] font-black uppercase mb-2 inline-block">
+            Member Access
+          </span>
+          <h1 className="text-2xl font-black text-white mb-6">Sign In to ShopKart</h1>
 
+          {error && (
+            <div className="mb-4 p-3 bg-red-950/50 border border-red-800 text-red-300 rounded-xl text-xs font-bold">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+              <label className="block text-xs font-black uppercase tracking-wider text-gray-300 mb-1.5">
+                Email Address
               </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-all"
-                  placeholder="rahul.sharma@example.com"
-                />
-              </div>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="name@example.com"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#090b0f] border border-[#232d3b] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#84cc16] shadow-inner"
+              />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label className="block text-xs font-black uppercase tracking-wider text-gray-300 mb-1.5">
                 Password
               </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-all"
-                  placeholder="Enter your password"
-                />
-              </div>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                placeholder="••••••••"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#090b0f] border border-[#232d3b] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#84cc16] shadow-inner"
+              />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 cursor-pointer">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                  Forgot your password?
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 ease-in-out hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Signing in...' : 'Sign in'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 px-4 text-xs font-black btn-3d-olive shadow-xl mt-4 cursor-pointer"
+            >
+              {loading ? 'Authenticating...' : 'Sign In ⚡'}
+            </button>
           </form>
+
+          <div className="border-t border-[#1c232d] mt-6 pt-5 text-center text-xs text-gray-400">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-[#84cc16] hover:underline font-bold">
+              Create account ›
+            </Link>
+          </div>
         </div>
       </div>
     </div>

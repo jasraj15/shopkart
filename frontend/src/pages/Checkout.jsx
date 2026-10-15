@@ -22,7 +22,6 @@ const Checkout = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [testModalData, setTestModalData] = useState(null);
 
-  // If cart is loaded and empty, redirect back to cart
   useEffect(() => {
     if (!cartLoading && (!cartItems || cartItems.length === 0)) {
       navigate('/cart', { replace: true });
@@ -32,7 +31,6 @@ const Checkout = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear field-specific error
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: null }));
     }
@@ -41,58 +39,31 @@ const Checkout = () => {
 
   const validateForm = () => {
     const errors = {};
-
-    if (!formData.fullName.trim()) {
-      errors.fullName = 'Full Name is required';
-    }
-
+    if (!formData.fullName.trim()) errors.fullName = 'Enter full name';
     const cleanPhone = formData.phone.trim().replace(/[^0-9]/g, '');
-    if (!cleanPhone) {
-      errors.phone = 'Phone number is required';
-    } else if (cleanPhone.length < 10) {
-      errors.phone = 'Phone must be a valid 10-digit number';
-    }
-
-    if (!formData.addressLine1.trim()) {
-      errors.addressLine1 = 'Address line is required';
-    }
-
-    if (!formData.city.trim()) {
-      errors.city = 'City is required';
-    }
-
-    if (!formData.state.trim()) {
-      errors.state = 'State is required';
-    }
-
+    if (!cleanPhone || cleanPhone.length < 10) errors.phone = 'Enter valid 10-digit number';
+    if (!formData.addressLine1.trim()) errors.addressLine1 = 'Enter address line';
+    if (!formData.city.trim()) errors.city = 'Enter city';
+    if (!formData.state.trim()) errors.state = 'Enter state';
     const pin = formData.pincode.trim();
-    if (!pin) {
-      errors.pincode = 'Pincode is required';
-    } else if (!/^\d{6}$/.test(pin)) {
-      errors.pincode = 'Pincode must contain exactly 6 digits';
-    }
+    if (!pin || !/^\d{6}$/.test(pin)) errors.pincode = 'Enter 6-digit PIN';
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  // Verify payment on backend and complete checkout
   const handleVerifyPayment = async (verificationPayload) => {
     try {
       const verifyRes = await api.post('/orders/verify-payment', verificationPayload);
       if (verifyRes.data.success) {
-        // Clear global cart state
         await refreshCart();
-        // Redirect to order confirmation page
         navigate(`/order-success/${verificationPayload.shopKartOrderId}`, { replace: true });
       } else {
         setErrorMessage(verifyRes.data.message || 'Payment verification failed.');
       }
     } catch (err) {
       console.error('Payment verification error:', err);
-      setErrorMessage(
-        err.response?.data?.message || 'Payment verification failed. Your cart was not cleared.'
-      );
+      setErrorMessage(err.response?.data?.message || 'Payment verification failed.');
     } finally {
       setSubmitting(false);
       setTestModalData(null);
@@ -107,7 +78,6 @@ const Checkout = () => {
     setErrorMessage(null);
 
     try {
-      // 1. Create pending ShopKart order and Razorpay order on the backend
       const res = await api.post('/orders/create-payment-order', {
         shippingAddress: {
           fullName: formData.fullName.trim(),
@@ -120,21 +90,17 @@ const Checkout = () => {
       });
 
       const { shopKartOrderId, razorpayOrderId, amount, currency, key } = res.data;
-
-      // 2. Load Razorpay script
       const isLoaded = await loadRazorpayScript();
 
       if (isLoaded && window.Razorpay) {
-        // Open standard Razorpay Checkout
         const options = {
           key: key,
           amount: amount,
           currency: currency,
-          name: 'ShopKart',
+          name: 'ShopKart Drops',
           description: `Order #${shopKartOrderId.slice(-6).toUpperCase()}`,
           order_id: razorpayOrderId.startsWith('order_test_') ? undefined : razorpayOrderId,
           handler: async function (response) {
-            // Forward to server for cryptographic signature verification
             await handleVerifyPayment({
               shopKartOrderId,
               razorpay_order_id: response.razorpay_order_id || razorpayOrderId,
@@ -147,57 +113,43 @@ const Checkout = () => {
             contact: formData.phone,
           },
           theme: {
-            color: '#2563EB',
+            color: '#84cc16',
           },
           modal: {
             ondismiss: function () {
               setSubmitting(false);
-              setErrorMessage('Payment cancelled. Your cart has been preserved.');
+              setErrorMessage('Payment cancelled. Your bag has been preserved.');
             },
           },
         };
 
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (resp) {
-          console.error('Razorpay payment failed:', resp.error);
           setSubmitting(false);
-          setErrorMessage(
-            `Payment failed: ${resp.error?.description || 'Transaction unsuccessful'}. Your cart has not been cleared.`
-          );
+          setErrorMessage(`Payment failed: ${resp.error?.description || 'Transaction unsuccessful'}.`);
         });
         rzp.open();
       } else {
-        // Fallback / Offline Simulator mode: allow completing test payment
-        setTestModalData({
-          shopKartOrderId,
-          razorpayOrderId,
-          amount,
-        });
+        setTestModalData({ shopKartOrderId, razorpayOrderId, amount });
       }
     } catch (err) {
       console.error('Checkout error:', err);
       setSubmitting(false);
-      setErrorMessage(
-        err.response?.data?.message || 'Unable to initiate checkout. Please try again.'
-      );
+      setErrorMessage(err.response?.data?.message || 'Unable to initiate checkout.');
     }
   };
 
-  // Helper for test simulator modal
   const handleSimulatePayment = async (success) => {
     if (!testModalData) return;
     if (!success) {
       setTestModalData(null);
       setSubmitting(false);
-      setErrorMessage('Payment failed or cancelled. Your cart has not been cleared.');
+      setErrorMessage('Payment cancelled.');
       return;
     }
 
     const testPaymentId = 'pay_test_' + Date.now();
-    // In our backend, the test secret is shopkart_razorpay_secret_key_123
-    // We compute HMAC SHA256 or request verification
     try {
-      // Import Web Crypto API for client-side HMAC in test simulator
       const enc = new TextEncoder();
       const secret = 'shopkart_razorpay_secret_key_123';
       const key = await window.crypto.subtle.importKey(
@@ -219,7 +171,7 @@ const Checkout = () => {
         razorpay_signature: testSignature,
       });
     } catch (e) {
-      console.error('Simulator HMAC error:', e);
+      console.error(e);
       setErrorMessage('Failed to simulate signature verification.');
       setSubmitting(false);
     }
@@ -228,162 +180,134 @@ const Checkout = () => {
   if (cartLoading) {
     return (
       <div className="min-h-[70vh] flex flex-col justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-gray-500 font-medium">Preparing checkout...</p>
+        <div className="w-12 h-12 border-4 border-[#252e3b] border-t-[#84cc16] rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Securing checkout gateway...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Breadcrumb */}
-      <div className="mb-6 flex items-center space-x-2 text-sm text-gray-500">
-        <Link to="/cart" className="hover:text-blue-600">
-          Cart
-        </Link>
-        <span>/</span>
-        <span className="font-semibold text-gray-900">Checkout</span>
+      <div className="mb-4 text-xs font-bold text-gray-400 flex items-center gap-2">
+        <Link to="/cart" className="hover:text-white">Bag</Link>
+        <span>›</span>
+        <span className="text-[#84cc16]">Checkout</span>
       </div>
 
-      <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-8">
-        Checkout & Payment
-      </h1>
+      <div className="mb-8">
+        <span className="badge-olive px-3 py-1 rounded-full text-[10px] font-black uppercase mb-2 inline-block">
+          Step 2 of 2
+        </span>
+        <h1 className="text-3xl font-black text-white tracking-tight">
+          Dispatch Address & Payment
+        </h1>
+      </div>
 
       {errorMessage && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-3">
-          <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+        <div className="mb-6 p-4 bg-red-950/40 border border-red-800 rounded-2xl text-red-300 text-xs flex items-start gap-3">
+          <span className="text-lg">⚠️</span>
           <div>
-            <p className="font-bold">Checkout Issue</p>
-            <p>{errorMessage}</p>
+            <p className="font-bold">Notice</p>
+            <p className="mt-0.5">{errorMessage}</p>
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left: Shipping Details Form */}
+        {/* Left: 3D Form Card */}
         <div className="lg:col-span-7">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
-            <div className="flex items-center justify-between pb-4 mb-6 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <span>📍</span> Shipping Details
-              </h2>
-              <span className="text-xs text-gray-400 font-medium">* All fields required</span>
-            </div>
+          <div className="bento-3d p-6 sm:p-8">
+            <h2 className="text-base font-black text-white mb-6 pb-3 border-b border-[#232d3b] flex items-center gap-2">
+              <span>📍</span> Delivery Credentials
+            </h2>
 
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-                  Full Name
+                <label className="block text-xs font-black uppercase tracking-wider text-gray-300 mb-1.5">
+                  Recipient Full Name
                 </label>
                 <input
                   type="text"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
-                  placeholder="e.g. Aarav Sharma"
-                  className={`w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-all ${
-                    formErrors.fullName
-                      ? 'border-red-300 focus:ring-red-400 bg-red-50/30'
-                      : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
+                  placeholder="e.g. Jasraj Singh"
+                  className={`w-full px-4 py-2.5 rounded-xl bg-[#090b0f] border text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#84cc16] shadow-inner ${
+                    formErrors.fullName ? 'border-red-500' : 'border-[#232d3b]'
                   }`}
                 />
-                {formErrors.fullName && (
-                  <p className="mt-1 text-xs text-red-600 font-medium">{formErrors.fullName}</p>
-                )}
+                {formErrors.fullName && <p className="mt-1 text-xs text-red-400 font-bold">{formErrors.fullName}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-                  Phone Number
+                <label className="block text-xs font-black uppercase tracking-wider text-gray-300 mb-1.5">
+                  Mobile Number (10 digits)
                 </label>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="10-digit mobile number"
+                  placeholder="10-digit number"
                   maxLength="10"
-                  className={`w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-all ${
-                    formErrors.phone
-                      ? 'border-red-300 focus:ring-red-400 bg-red-50/30'
-                      : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
+                  className={`w-full px-4 py-2.5 rounded-xl bg-[#090b0f] border text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#84cc16] shadow-inner ${
+                    formErrors.phone ? 'border-red-500' : 'border-[#232d3b]'
                   }`}
                 />
-                {formErrors.phone && (
-                  <p className="mt-1 text-xs text-red-600 font-medium">{formErrors.phone}</p>
-                )}
+                {formErrors.phone && <p className="mt-1 text-xs text-red-400 font-bold">{formErrors.phone}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-                  Address Line
+                <label className="block text-xs font-black uppercase tracking-wider text-gray-300 mb-1.5">
+                  Street Address (House no., Apartment, Landmark)
                 </label>
                 <input
                   type="text"
                   name="addressLine1"
                   value={formData.addressLine1}
                   onChange={handleChange}
-                  placeholder="House / Flat No., Street, Landmark"
-                  className={`w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-all ${
-                    formErrors.addressLine1
-                      ? 'border-red-300 focus:ring-red-400 bg-red-50/30'
-                      : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
+                  placeholder="Flat/House No., Street address"
+                  className={`w-full px-4 py-2.5 rounded-xl bg-[#090b0f] border text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#84cc16] shadow-inner ${
+                    formErrors.addressLine1 ? 'border-red-500' : 'border-[#232d3b]'
                   }`}
                 />
-                {formErrors.addressLine1 && (
-                  <p className="mt-1 text-xs text-red-600 font-medium">{formErrors.addressLine1}</p>
-                )}
+                {formErrors.addressLine1 && <p className="mt-1 text-xs text-red-400 font-bold">{formErrors.addressLine1}</p>}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-                    City
-                  </label>
+                  <label className="block text-xs font-black uppercase tracking-wider text-gray-300 mb-1.5">City</label>
                   <input
                     type="text"
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
-                    placeholder="e.g. Bengaluru"
-                    className={`w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-all ${
-                      formErrors.city
-                        ? 'border-red-300 focus:ring-red-400 bg-red-50/30'
-                        : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
+                    placeholder="City"
+                    className={`w-full px-4 py-2.5 rounded-xl bg-[#090b0f] border text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#84cc16] shadow-inner ${
+                      formErrors.city ? 'border-red-500' : 'border-[#232d3b]'
                     }`}
                   />
-                  {formErrors.city && (
-                    <p className="mt-1 text-xs text-red-600 font-medium">{formErrors.city}</p>
-                  )}
+                  {formErrors.city && <p className="mt-1 text-xs text-red-400 font-bold">{formErrors.city}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-                    State
-                  </label>
+                  <label className="block text-xs font-black uppercase tracking-wider text-gray-300 mb-1.5">State</label>
                   <input
                     type="text"
                     name="state"
                     value={formData.state}
                     onChange={handleChange}
-                    placeholder="e.g. Karnataka"
-                    className={`w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-all ${
-                      formErrors.state
-                        ? 'border-red-300 focus:ring-red-400 bg-red-50/30'
-                        : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
+                    placeholder="State"
+                    className={`w-full px-4 py-2.5 rounded-xl bg-[#090b0f] border text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#84cc16] shadow-inner ${
+                      formErrors.state ? 'border-red-500' : 'border-[#232d3b]'
                     }`}
                   />
-                  {formErrors.state && (
-                    <p className="mt-1 text-xs text-red-600 font-medium">{formErrors.state}</p>
-                  )}
+                  {formErrors.state && <p className="mt-1 text-xs text-red-400 font-bold">{formErrors.state}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-                    Pincode
-                  </label>
+                  <label className="block text-xs font-black uppercase tracking-wider text-gray-300 mb-1.5">PIN Code</label>
                   <input
                     type="text"
                     name="pincode"
@@ -391,15 +315,11 @@ const Checkout = () => {
                     onChange={handleChange}
                     placeholder="6 digits"
                     maxLength="6"
-                    className={`w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-all ${
-                      formErrors.pincode
-                        ? 'border-red-300 focus:ring-red-400 bg-red-50/30'
-                        : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'
+                    className={`w-full px-4 py-2.5 rounded-xl bg-[#090b0f] border text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#84cc16] shadow-inner ${
+                      formErrors.pincode ? 'border-red-500' : 'border-[#232d3b]'
                     }`}
                   />
-                  {formErrors.pincode && (
-                    <p className="mt-1 text-xs text-red-600 font-medium">{formErrors.pincode}</p>
-                  )}
+                  {formErrors.pincode && <p className="mt-1 text-xs text-red-400 font-bold">{formErrors.pincode}</p>}
                 </div>
               </div>
 
@@ -407,122 +327,83 @@ const Checkout = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`w-full py-3.5 px-4 rounded-xl text-base font-bold text-white transition-all shadow-md flex items-center justify-center gap-2 ${
-                    submitting
-                      ? 'bg-blue-400 cursor-wait'
-                      : 'bg-blue-600 hover:bg-blue-700 active:scale-[0.99] hover:shadow-lg'
-                  }`}
+                  className="w-full py-4 px-6 text-sm font-black btn-3d-olive shadow-xl flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {submitting ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                      </svg>
-                      <span>Processing Payment...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>💳 Pay with Razorpay (Test Mode)</span>
-                      <span className="text-blue-200 font-normal">| ₹{subtotal.toLocaleString('en-IN')}</span>
-                    </>
-                  )}
+                  {submitting ? 'Connecting Razorpay...' : `Confirm & Pay ₹${subtotal.toLocaleString('en-IN')} ⚡`}
                 </button>
               </div>
             </form>
           </div>
         </div>
 
-        {/* Right: Final Order Summary */}
+        {/* Right: Summary Box */}
         <div className="lg:col-span-5">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-24">
-            <h2 className="text-xl font-bold text-gray-900 pb-4 mb-4 border-b border-gray-100">
-              Order Items ({cartCount})
+          <div className="bento-3d p-6 sticky top-28 shadow-xl">
+            <h2 className="text-base font-black text-white pb-3 mb-4 border-b border-[#232d3b]">
+              Summary ({cartCount} pieces)
             </h2>
 
-            <div className="divide-y divide-gray-100 max-h-72 overflow-y-auto mb-6 pr-1">
+            <div className="divide-y divide-[#1c232d] max-h-60 overflow-y-auto mb-4 pr-1">
               {cartItems.map((item) => (
-                <div key={item.product?._id} className="py-3 flex items-center gap-3">
-                  <div className="w-14 h-14 bg-gray-50 rounded-lg p-1 flex-shrink-0 flex items-center justify-center border border-gray-100">
+                <div key={item.product?._id} className="py-2.5 flex items-center gap-3">
+                  <div className="w-12 h-12 bg-[#12161f] rounded-lg p-1.5 flex-shrink-0 flex items-center justify-center border border-[#232d3b]">
                     <img
                       src={item.product?.image}
                       alt={item.product?.name}
-                      className="max-h-full max-w-full object-contain mix-blend-multiply"
-                      onError={(e) => { e.target.src = 'https://via.placeholder.com/80?text=No+Img'; }}
+                      className="max-h-full max-w-full object-contain"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
-                      {item.product?.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      ₹{item.product?.price.toLocaleString('en-IN')} × {item.quantity}
-                    </p>
+                    <p className="text-xs font-bold text-white truncate">{item.product?.name}</p>
+                    <p className="text-[11px] text-[#84cc16]">Qty: {item.quantity}</p>
                   </div>
-                  <div className="text-sm font-bold text-gray-900">
+                  <div className="text-xs font-black text-white">
                     ₹{((item.product?.price || 0) * item.quantity).toLocaleString('en-IN')}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="space-y-3 pt-4 border-t border-gray-100 text-sm text-gray-600">
+            <div className="space-y-2 text-xs text-gray-300 pt-3 border-t border-[#232d3b]">
               <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span className="font-semibold text-gray-900">₹{subtotal.toLocaleString('en-IN')}</span>
+                <span>Items:</span>
+                <span>₹{subtotal.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between">
-                <span>Delivery Charges</span>
-                <span className="font-semibold text-green-600">FREE</span>
+                <span>Shipping:</span>
+                <span className="text-[#84cc16] font-bold">FREE 24H</span>
               </div>
-              <div className="flex justify-between pt-3 border-t border-gray-200 text-base font-bold text-gray-900">
-                <span>Total Payable</span>
-                <span className="text-xl font-black text-gray-900">
-                  ₹{subtotal.toLocaleString('en-IN')}
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
-              <span className="text-amber-600 font-bold">🛡️</span>
-              <div>
-                <strong>Razorpay Test Mode Active:</strong> No real money will be charged. All purchases use test tokens and mandatory cryptographic signature verification.
+              <div className="flex justify-between pt-3 border-t border-[#232d3b] text-sm font-black text-white">
+                <span>Total Payable:</span>
+                <span className="text-xl text-olive-gradient">₹{subtotal.toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Test Mode Fallback Simulator Modal (used if checkout.js is blocked or in offline mode) */}
+      {/* Simulator Modal */}
       {testModalData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 text-center animate-in fade-in zoom-in-95">
-            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+          <div className="bento-3d max-w-md w-full p-8 text-center shadow-2xl">
+            <div className="w-14 h-14 bg-[#1e2816] text-[#84cc16] rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold border border-[#3b5025]">
               💳
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Razorpay Test Checkout
-            </h3>
-            <p className="text-sm text-gray-600 mb-1">
-              Order ID: <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">{testModalData.razorpayOrderId}</code>
-            </p>
-            <p className="text-2xl font-black text-gray-900 my-3">
+            <h3 className="text-xl font-black text-white mb-1">Razorpay Sandbox Vault</h3>
+            <p className="text-xs text-gray-400 mb-4">Order Ref: {testModalData.razorpayOrderId}</p>
+            <div className="text-3xl font-black text-olive-gradient mb-6">
               ₹{(testModalData.amount / 100).toLocaleString('en-IN')}
-            </p>
-            <p className="text-xs text-gray-500 mb-6 bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-              Simulating a Razorpay Test transaction. Clicking Confirm will generate a verified HMAC SHA256 signature and post to <code>/orders/verify-payment</code>.
-            </p>
-
+            </div>
             <div className="flex gap-3">
               <button
                 onClick={() => handleSimulatePayment(false)}
-                className="flex-1 py-2.5 px-4 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                className="btn-3d-dark flex-1 py-3 text-xs"
               >
                 Simulate Fail
               </button>
               <button
                 onClick={() => handleSimulatePayment(true)}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-md"
+                className="btn-3d-olive flex-1 py-3 text-xs"
               >
                 Confirm Test Pay
               </button>

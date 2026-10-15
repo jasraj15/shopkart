@@ -12,6 +12,8 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cartMsg, setCartMsg] = useState(null);
+  const [wishlistSaved, setWishlistSaved] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -22,7 +24,7 @@ const ProductDetails = () => {
         setProduct(response.data);
       } catch (err) {
         console.error("Failed to fetch product details:", err);
-        setError(err.response?.status === 404 ? "Product not found." : "Something went wrong while loading the product details.");
+        setError(err.response?.status === 404 ? "Piece not found." : "Something went wrong loading details.");
       } finally {
         setLoading(false);
       }
@@ -31,131 +33,175 @@ const ProductDetails = () => {
     fetchProductDetails();
   }, [id]);
 
+  const handleToggleWishlist = async () => {
+    if (!product || wishlistLoading) return;
+    try {
+      setWishlistLoading(true);
+      const res = await api.patch(`/wishlist/${product._id}/toggle`);
+      setWishlistSaved(Boolean(res.data.saved));
+    } catch (err) {
+      console.error("Wishlist error:", err);
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-[70vh] flex flex-col justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-gray-500 font-medium">Loading product details...</p>
+        <div className="w-12 h-12 border-4 border-[#252e3b] border-t-[#84cc16] rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest animate-pulse">Loading drop specifications...</p>
       </div>
     );
   }
 
   if (error || !product) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-8 rounded-xl inline-block w-full">
-          <svg className="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-          <h2 className="text-2xl font-bold mb-2">{error || "Product not found"}</h2>
-          <p className="text-red-600 mb-6">The product you are looking for might have been removed or is temporarily unavailable.</p>
-          <Link to="/products" className="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-            Back to Products
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+        <div className="bento-3d p-8">
+          <h2 className="text-xl font-bold text-white mb-2">{error || "Product not found"}</h2>
+          <p className="text-gray-400 text-xs mb-6">This piece may have ended its release window.</p>
+          <Link to="/products" className="btn-3d-olive px-6 py-2.5 text-xs inline-block">
+            Back to Catalog
           </Link>
         </div>
       </div>
     );
   }
 
+  const inCartQty = getItemQuantity(product._id);
+  const isOutOfStock = product.stock === 0;
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Back button */}
       <div className="mb-6">
         <button 
           onClick={() => navigate(-1)} 
-          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
+          className="btn-3d-dark px-4 py-2 text-xs font-bold inline-flex items-center gap-2"
         >
-          <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-          Back
+          <span>←</span> Back to drops
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          {/* Image Section */}
-          <div className="bg-gray-50 p-8 flex items-center justify-center min-h-[400px] border-b md:border-b-0 md:border-r border-gray-200">
-            <img 
-              src={product.image} 
-              alt={product.name} 
-              className="max-w-full max-h-[500px] object-contain mix-blend-multiply"
-              onError={(e) => { e.target.src = 'https://via.placeholder.com/600?text=No+Image'; }}
-            />
-          </div>
-
-          {/* Details Section */}
-          <div className="p-8 md:p-12 flex flex-col">
-            <div className="mb-2">
-              <span className="inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left: 3D Product Image Showcase */}
+        <div className="lg:col-span-6">
+          <div className="bento-3d p-8 sm:p-12 flex flex-col items-center justify-center relative min-h-[460px]">
+            <div className="absolute top-4 left-4">
+              <span className="badge-olive px-3 py-1 rounded-full text-[10px] font-black uppercase">
                 {product.category}
               </span>
             </div>
-            
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
-              {product.name}
-            </h1>
-            
-            <div className="text-4xl font-black text-gray-900 mb-6">
-              ₹{product.price.toLocaleString('en-IN')}
-            </div>
-            
-            <div className="prose prose-blue prose-lg text-gray-600 mb-8 max-w-none">
-              <p>{product.description}</p>
-            </div>
-            
-            <div className="mt-auto pt-6 border-t border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <div className={`w-3 h-3 rounded-full mr-2 ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                  <span className={`font-medium ${product.stock > 0 ? 'text-green-700' : 'text-red-700'}`}>
-                    {product.stock > 0 
-                      ? product.stock > 10 ? 'In Stock' : `Only ${product.stock} left in stock` 
-                      : 'Out of Stock'}
-                  </span>
-                </div>
-                {getItemQuantity(product._id) > 0 && (
-                  <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-                    {getItemQuantity(product._id)} currently in cart
-                  </span>
-                )}
+
+            <img 
+              src={product.image} 
+              alt={product.name} 
+              className="max-h-[380px] max-w-full object-contain drop-shadow-2xl transition-transform duration-500 hover:scale-105"
+              onError={(e) => { e.target.src = 'https://via.placeholder.com/600?text=ShopKart'; }}
+            />
+          </div>
+        </div>
+
+        {/* Right: Specifications & 3D Purchase Action */}
+        <div className="lg:col-span-6 flex flex-col justify-between">
+          <div className="bento-3d p-6 sm:p-8 flex-1 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-black uppercase tracking-widest text-[#84cc16]">
+                  Drop Release • Authentic
+                </span>
+                
+                {/* 3D Wishlist Button */}
+                <button
+                  onClick={handleToggleWishlist}
+                  disabled={wishlistLoading}
+                  className={`btn-3d-dark p-2.5 flex items-center justify-center ${
+                    wishlistSaved ? 'text-red-500 border-red-500/40' : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <svg className={`w-5 h-5 ${wishlistSaved ? 'fill-current animate-spring' : 'fill-none'}`} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </button>
               </div>
 
-              {cartMsg && (
-                <div className={`mb-4 p-3 rounded-lg text-sm font-semibold text-center ${
-                  cartMsg.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
-                }`}>
-                  {cartMsg.text}
+              <h1 className="text-2xl sm:text-3xl font-black text-white mb-4 leading-tight">
+                {product.name}
+              </h1>
+
+              {/* Price display */}
+              <div className="flex items-baseline gap-3 mb-6">
+                <span className="text-3xl sm:text-4xl font-black text-olive-gradient">
+                  ₹{product.price.toLocaleString('en-IN')}
+                </span>
+                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">
+                  Inclusive of all taxes
+                </span>
+              </div>
+
+              {/* Description */}
+              <div className="p-4 rounded-xl bg-[#0b0e14] border border-[#232d3b] text-gray-300 text-xs sm:text-sm leading-relaxed mb-6">
+                <p>{product.description}</p>
+              </div>
+
+              {/* Stock Urgency Bar */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center text-xs mb-1.5 font-bold">
+                  <span className="text-gray-400">Vault Availability</span>
+                  <span className={product.stock > 0 ? 'text-[#84cc16]' : 'text-red-400'}>
+                    {product.stock > 0 ? `${product.stock} units ready to ship` : 'Sold Out'}
+                  </span>
                 </div>
-              )}
-              
-              <button 
+                <div className="w-full h-2 rounded-full bg-[#18202b] overflow-hidden">
+                  <div 
+                    className="h-full rounded-full bg-gradient-to-r from-[#65a30d] to-[#84cc16]"
+                    style={{ width: `${Math.min(100, (product.stock / 50) * 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Notification */}
+            {cartMsg && (
+              <div className={`mb-4 p-3 rounded-xl text-xs font-black text-center ${
+                cartMsg.type === 'error' ? 'bg-red-950/40 text-red-300 border border-red-800' : 'bg-[#84cc16]/20 text-[#bef264] border border-[#84cc16]/40'
+              }`}>
+                {cartMsg.text}
+              </div>
+            )}
+
+            {/* Tactile 3D Action Strip */}
+            <div className="space-y-3 pt-4 border-t border-[#232d3b]">
+              <button
                 onClick={async () => {
-                  if (mutatingItemId === product._id || product.stock === 0) return;
+                  if (mutatingItemId === product._id || isOutOfStock) return;
                   setCartMsg(null);
                   const res = await addToCart(product._id);
                   if (res.success) {
-                    setCartMsg({ type: 'success', text: '✓ Added to your cart!' });
+                    setCartMsg({ type: 'success', text: '✓ Secured into your shopping bag' });
                     setTimeout(() => setCartMsg(null), 3000);
                   } else {
                     setCartMsg({ type: 'error', text: res.message });
                     setTimeout(() => setCartMsg(null), 4000);
                   }
                 }}
-                disabled={product.stock === 0 || mutatingItemId === product._id || getItemQuantity(product._id) >= product.stock}
-                className={`w-full py-4 px-8 rounded-xl text-lg font-bold text-white transition-all transform flex justify-center items-center shadow-lg
-                  ${product.stock === 0 || getItemQuantity(product._id) >= product.stock
-                    ? 'bg-gray-400 cursor-not-allowed opacity-70' 
-                    : mutatingItemId === product._id
-                    ? 'bg-blue-400 cursor-wait'
-                    : 'bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-xl focus:ring-4 focus:ring-blue-300 active:scale-[0.99]'}`}
+                disabled={isOutOfStock || mutatingItemId === product._id || inCartQty >= product.stock}
+                className={`w-full py-4 px-6 text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  isOutOfStock || inCartQty >= product.stock
+                    ? 'bg-[#18202b] text-gray-500 border border-[#232d3b] cursor-not-allowed'
+                    : 'btn-3d-olive'
+                }`}
               >
-                <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                {mutatingItemId === product._id 
-                  ? 'Adding to Cart...' 
-                  : product.stock === 0 
-                  ? 'Out of Stock' 
-                  : getItemQuantity(product._id) >= product.stock
-                  ? 'Max Stock in Cart'
-                  : getItemQuantity(product._id) > 0
-                  ? 'Add Another to Cart'
-                  : 'Add to Cart'}
+                {mutatingItemId === product._id ? 'Securing...' : isOutOfStock ? 'Sold Out' : 'Secure This Piece ⚡'}
               </button>
+
+              <div className="grid grid-cols-3 gap-2 text-center text-[10px] text-gray-400 font-bold pt-2">
+                <div className="p-2 rounded-lg bg-[#0c1017] border border-[#232d3b]">⚡ 24h Dispatch</div>
+                <div className="p-2 rounded-lg bg-[#0c1017] border border-[#232d3b]">🛡️ Authentic Grail</div>
+                <div className="p-2 rounded-lg bg-[#0c1017] border border-[#232d3b]">🔒 Razorpay Encrypted</div>
+              </div>
             </div>
           </div>
         </div>

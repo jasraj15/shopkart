@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import CartItem from '../components/CartItem';
@@ -10,9 +10,9 @@ const Cart = () => {
   // 1. Loading State
   if (cartLoading) {
     return (
-      <div className="min-h-[70vh] flex flex-col justify-center items-center px-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-gray-600 font-medium text-lg">Loading your cart...</p>
+      <div className="min-h-[70vh] flex flex-col justify-center items-center">
+        <div className="w-12 h-12 border-4 border-[#252e3b] border-t-[#84cc16] rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Syncing shopping bag...</p>
       </div>
     );
   }
@@ -20,20 +20,16 @@ const Cart = () => {
   // 2. Error State
   if (cartError) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-10 rounded-2xl shadow-sm">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold mb-2">Unable to load your cart.</h2>
-          <p className="text-red-600 mb-6">{cartError}</p>
+      <div className="max-w-xl mx-auto px-4 py-16 text-center">
+        <div className="bento-3d p-8">
+          <div className="text-3xl mb-3">⚠️</div>
+          <h2 className="text-lg font-bold text-white mb-2">Unable to load bag</h2>
+          <p className="text-gray-400 text-xs mb-6">{cartError}</p>
           <button
             onClick={refreshCart}
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+            className="btn-3d-olive px-6 py-2.5 text-xs"
           >
-            Try Again
+            Retry Connection
           </button>
         </div>
       </div>
@@ -43,102 +39,124 @@ const Cart = () => {
   // 3. Empty State
   if (!cartItems || cartItems.length === 0) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <div className="bg-white rounded-2xl p-10 border border-gray-100 shadow-sm">
-          <div className="w-24 h-24 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">
-            🛒
+      <div className="max-w-3xl mx-auto px-4 py-16 text-center">
+        <div className="bento-3d p-12 shadow-2xl">
+          <div className="w-20 h-20 bg-[#161c24] text-[#84cc16] rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-[0_4px_0_#0f141a]">
+            🛍️
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-3">
-            Your cart is empty 🛒
+          <h2 className="text-2xl font-black text-white mb-2">
+            Your Express Bag is Empty
           </h2>
-          <p className="text-gray-500 text-lg mb-8 max-w-md mx-auto">
-            Looks like you haven't added anything yet. Explore our top products and start shopping!
+          <p className="text-gray-400 text-xs sm:text-sm mb-6 max-w-md mx-auto">
+            Explore our curated catalog of streetwear, audio, and gadgets to build your haul.
           </p>
-          <Link
-            to="/products"
-            className="inline-flex items-center justify-center px-8 py-3.5 border border-transparent rounded-xl shadow-sm text-base font-bold text-white bg-blue-600 hover:bg-blue-700 hover:shadow-md transition-all duration-200"
-          >
-            Browse Products
-          </Link>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link
+              to="/products"
+              className="btn-3d-olive px-8 py-3 text-xs font-black inline-block"
+            >
+              Start Shopping
+            </Link>
+            <Link
+              to="/wishlist"
+              className="btn-3d-dark px-6 py-3 text-xs font-bold inline-block"
+            >
+              View Wishlist
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
-  // 4. Cart List + Order Summary
+  // 4. Cart Layout
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 mb-8 border-b border-gray-200">
+      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 pb-6 mb-8 border-b border-[#1c232d]">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">
-            My Cart
+          <span className="badge-olive px-3 py-1 rounded-full text-[10px] font-black uppercase mb-2 inline-block">
+            Verified Checkout
+          </span>
+          <h1 className="text-3xl font-black text-white tracking-tight">
+            Shopping Bag ({cartCount} pieces)
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {uniqueItemsCount} unique {uniqueItemsCount === 1 ? 'item' : 'items'} ({cartCount} total units)
-          </p>
         </div>
-        <Link
-          to="/products"
-          className="mt-3 sm:mt-0 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center"
-        >
-          ← Continue Shopping
+
+        <Link to="/products" className="btn-3d-dark px-4 py-2 text-xs font-bold self-start sm:self-auto">
+          ← Keep Exploring Drops
         </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left: Cart Items List */}
+        
+        {/* Left Column: Cart Items List */}
         <div className="lg:col-span-8 space-y-4">
           {cartItems.map((item) => (
             <CartItem key={item.product?._id || item._id} item={item} />
           ))}
         </div>
 
-        {/* Right: Order Summary */}
+        {/* Right Column: 3D Bento Summary Box */}
         <div className="lg:col-span-4">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-24">
-            <h2 className="text-xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-100">
-              Order Summary
+          <div className="bento-3d p-6 sm:p-7 sticky top-28 shadow-2xl">
+            <h2 className="text-lg font-black text-white pb-3 mb-4 border-b border-[#232d3b] flex items-center justify-between">
+              <span>Order Summary</span>
+              <span className="badge-olive px-2 py-0.5 rounded text-[10px]">
+                {cartCount} items
+              </span>
             </h2>
 
-            <div className="space-y-4 text-sm text-gray-600">
-              <div className="flex justify-between">
-                <span>Total Items</span>
-                <span className="font-semibold text-gray-900">{cartCount}</span>
-              </div>
+            {/* Delivery badge */}
+            <div className="p-3 rounded-xl bg-[#0b0e14] border border-[#232d3b] mb-5 text-xs text-[#84cc16] flex items-center gap-2">
+              <span className="text-base font-bold">⚡</span>
+              <span className="font-bold">Complimentary Express Dispatch Unlocked</span>
+            </div>
+
+            {/* Cost Details */}
+            <div className="space-y-3 text-xs text-gray-300">
               <div className="flex justify-between">
                 <span>Items Subtotal</span>
-                <span className="font-semibold text-gray-900">
-                  ₹{subtotal.toLocaleString('en-IN')}
-                </span>
+                <span className="font-bold text-white">₹{subtotal.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between">
-                <span>Shipping</span>
-                <span className="font-semibold text-green-600">FREE</span>
+                <span>Express Shipping</span>
+                <span className="font-bold text-[#84cc16]">FREE</span>
               </div>
               <div className="flex justify-between">
-                <span>Estimated Tax</span>
-                <span className="font-semibold text-gray-900">₹0</span>
+                <span>Estimated Taxes</span>
+                <span className="font-bold text-white">₹0</span>
               </div>
 
-              <div className="pt-4 border-t border-gray-200 flex justify-between items-baseline">
-                <span className="text-base font-bold text-gray-900">Total Amount</span>
-                <span className="text-2xl font-black text-gray-900">
+              <div className="pt-4 border-t border-[#232d3b] flex justify-between items-baseline">
+                <span className="text-sm font-bold text-gray-200">Total Payable</span>
+                <span className="text-2xl font-black text-olive-gradient">
                   ₹{subtotal.toLocaleString('en-IN')}
                 </span>
               </div>
             </div>
 
+            {/* 3D Tactile Checkout Button */}
             <button
-              type="button"
               onClick={() => navigate('/checkout')}
-              className="mt-6 w-full py-3.5 px-4 rounded-xl text-base font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.99] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              className="mt-6 w-full py-4 px-6 text-sm font-black btn-3d-olive shadow-xl flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Proceed to Checkout</span>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              <span>→</span>
             </button>
+
+            {/* Security Perks */}
+            <div className="mt-6 pt-4 border-t border-[#232d3b] space-y-2 text-[11px] text-gray-400">
+              <div className="flex items-center gap-2">
+                <span className="text-[#84cc16] font-bold">✓</span>
+                <span>256-bit encrypted Razorpay sandbox</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[#84cc16] font-bold">✓</span>
+                <span>Direct tracking updates on dispatch</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

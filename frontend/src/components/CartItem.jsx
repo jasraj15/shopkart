@@ -30,113 +30,92 @@ const CartItem = ({ item }) => {
   const itemTotal = (product.price || 0) * (item.quantity || 1);
 
   return (
-    <div className={`p-4 sm:p-6 bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-200 ${
-      isMutating ? 'opacity-60 pointer-events-none' : 'hover:shadow-md'
+    <div className={`p-5 card-3d rounded-2xl transition-all ${
+      isMutating ? 'opacity-50 pointer-events-none' : ''
     }`}>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-        {/* Product Image */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+        {/* Product Image Frame with 3D Depth */}
         <Link 
           to={`/products/${product._id}`}
-          className="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 bg-gray-50 rounded-lg p-2 flex items-center justify-center border border-gray-100 overflow-hidden group"
+          className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-[#12161f] rounded-xl p-2.5 flex items-center justify-center overflow-hidden border border-[#232d3b] shadow-inner"
         >
           <img
             src={product.image}
             alt={product.name}
-            className="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform"
-            onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=No+Image'; }}
+            className="max-h-full max-w-full object-contain drop-shadow"
+            onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=ShopKart'; }}
           />
         </Link>
 
-        {/* Product Details */}
+        {/* Product Information */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-blue-600">
-                {product.category || 'Product'}
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#84cc16]">
+                {product.category || 'Drop'}
               </span>
               <Link to={`/products/${product._id}`}>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors line-clamp-1">
+                <h3 className="text-sm sm:text-base font-bold text-white hover:text-[#bef264] transition-colors line-clamp-1">
                   {product.name}
                 </h3>
               </Link>
+              <div className="flex items-center gap-2 text-xs mt-1 text-gray-400">
+                <span className="text-[#84cc16] font-bold">● Ready for Dispatch</span>
+                <span>•</span>
+                <span>Express Courier</span>
+              </div>
             </div>
-            
-            {/* Line Item Total */}
-            <div className="text-right sm:text-right">
-              <span className="text-lg sm:text-xl font-extrabold text-gray-900">
+
+            <div className="text-left sm:text-right mt-1 sm:mt-0">
+              <span className="text-base sm:text-lg font-black text-white">
                 ₹{itemTotal.toLocaleString('en-IN')}
               </span>
-              <p className="text-xs text-gray-500">
+              <p className="text-[11px] text-gray-400">
                 ₹{product.price.toLocaleString('en-IN')} each
               </p>
             </div>
           </div>
 
-          {/* Stock limit warning if applicable */}
-          <div className="mt-2 text-xs">
-            {product.stock <= 5 && product.stock > 0 ? (
-              <span className="text-orange-600 font-medium">
-                ⚠️ Only {product.stock} left in stock
+          {/* 3D Stepper Controls & Delete Action */}
+          <div className="flex flex-wrap items-center gap-4 mt-4 pt-3 border-t border-[#1c232d]">
+            {/* 3D Stepper */}
+            <div className="flex items-center bg-[#090b0f] border border-[#232d3b] rounded-xl overflow-hidden shadow-inner">
+              <button
+                onClick={handleDecrease}
+                disabled={isMinQuantity || isMutating}
+                className="px-3 py-1.5 text-gray-300 hover:bg-[#161c24] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-xs font-black cursor-pointer"
+              >
+                −
+              </button>
+              <span className="px-3 py-1.5 text-xs font-black text-white min-w-[36px] text-center bg-[#10141a]">
+                {item.quantity}
               </span>
-            ) : product.stock === 0 ? (
-              <span className="text-red-600 font-medium">
-                ❌ Out of stock
-              </span>
-            ) : (
-              <span className="text-green-600 font-medium">
-                ✓ In Stock ({product.stock} available)
-              </span>
-            )}
-          </div>
-
-          {/* Controls: Quantity [-] Qty [+] and [Remove] */}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-gray-100">
-            {/* Quantity Selector */}
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-medium text-gray-500 mr-1">Qty:</span>
-              <div className="inline-flex items-center border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                <button
-                  type="button"
-                  onClick={handleDecrease}
-                  disabled={isMinQuantity || isMutating}
-                  title={isMinQuantity ? "Quantity cannot be less than 1 (use Remove button)" : "Decrease quantity"}
-                  className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-200 active:bg-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-bold text-base"
-                >
-                  −
-                </button>
-                <span className="w-10 text-center text-sm font-semibold text-gray-900 bg-white py-1">
-                  {item.quantity}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleIncrease}
-                  disabled={isMaxQuantity || isMutating}
-                  title={isMaxQuantity ? `Cannot exceed stock limit of ${product.stock}` : "Increase quantity"}
-                  className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-200 active:bg-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-bold text-base"
-                >
-                  +
-                </button>
-              </div>
-
-              {isMaxQuantity && (
-                <span className="text-xs text-amber-600 font-medium ml-2">
-                  Max stock reached
-                </span>
-              )}
+              <button
+                onClick={handleIncrease}
+                disabled={isMaxQuantity || isMutating}
+                className="px-3 py-1.5 text-gray-300 hover:bg-[#161c24] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-xs font-black cursor-pointer"
+              >
+                +
+              </button>
             </div>
 
             {/* Remove Action */}
             <button
-              type="button"
               onClick={handleRemove}
               disabled={isMutating}
-              className="inline-flex items-center text-sm text-red-500 hover:text-red-700 font-medium transition-colors p-1 hover:bg-red-50 rounded"
+              className="text-xs font-bold text-gray-400 hover:text-red-400 cursor-pointer transition-colors"
             >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
               Remove
             </button>
+
+            <span className="text-gray-600 text-xs">|</span>
+
+            <Link
+              to={`/products/${product._id}`}
+              className="text-xs text-[#84cc16] hover:underline transition-colors font-bold"
+            >
+              View specs ›
+            </Link>
           </div>
         </div>
       </div>
