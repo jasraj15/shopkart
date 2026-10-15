@@ -18,12 +18,12 @@ const CATEGORIES = [
 
 const ProductSkeleton = () => (
   <div className="card-3d rounded-2xl p-4 flex flex-col h-[400px] animate-pulse">
-    <div className="h-52 rounded-xl bg-[#161c24] mb-4"></div>
-    <div className="h-3 w-1/4 rounded bg-[#161c24] mb-2"></div>
-    <div className="h-5 w-3/4 rounded bg-[#161c24] mb-2"></div>
-    <div className="h-3 w-1/2 rounded bg-[#161c24] mb-4"></div>
-    <div className="h-6 w-1/3 rounded bg-[#161c24] mb-auto"></div>
-    <div className="h-10 rounded-xl bg-[#161c24] mt-4"></div>
+    <div className="h-52 rounded-xl bg-[#eef1ff] mb-4"></div>
+    <div className="h-3 w-1/4 rounded bg-[#eef1ff] mb-2"></div>
+    <div className="h-5 w-3/4 rounded bg-[#e0eaff] mb-2"></div>
+    <div className="h-3 w-1/2 rounded bg-[#eef1ff] mb-4"></div>
+    <div className="h-6 w-1/3 rounded bg-[#eef1ff] mb-auto"></div>
+    <div className="h-10 rounded-xl bg-[#e0eaff] mt-4"></div>
   </div>
 );
 
@@ -111,15 +111,15 @@ const Products = () => {
           </div>
 
           <div>
-            <h2 className="text-2xl font-black text-white group-hover:text-[#bef264] transition-colors tracking-tight">
+            <h2 className="text-2xl font-black text-[#1a1d2e] group-hover:text-[#4a4cdf] transition-colors tracking-tight">
               Curated Catalog
             </h2>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Browse {products.length} exclusive drops from Tokyo, NYC & London streetwear to audio setups.
             </p>
           </div>
 
-          <div className="mt-5 pt-3 border-t border-[#232d3b] flex items-center justify-between text-xs font-bold text-[#84cc16]">
+          <div className="mt-5 pt-3 border-t border-[#e2e6f0] flex items-center justify-between text-xs font-bold text-[#6069ef]">
             <span>Explore All Pieces</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </div>
@@ -131,22 +131,22 @@ const Products = () => {
           className="bento-3d p-6 cursor-pointer flex flex-col justify-between group relative overflow-hidden"
         >
           <div className="flex items-start justify-between mb-4">
-            <span className="bg-[#ef4444]/15 border border-[#ef4444]/30 text-[#f87171] px-3 py-1 rounded-full text-[10px] font-black uppercase">
+            <span className="bg-[#fce8f0] border border-[#f4a0c0] text-[#e55a8a] px-3 py-1 rounded-full text-[10px] font-black uppercase">
               ♥ Moodboard
             </span>
-            <span className="text-2xl group-hover:scale-120 transition-transform text-[#ef4444]">❤️</span>
+            <span className="text-2xl group-hover:scale-120 transition-transform text-[#e55a8a]">❤️</span>
           </div>
 
           <div>
-            <h2 className="text-2xl font-black text-white group-hover:text-red-300 transition-colors tracking-tight">
+            <h2 className="text-2xl font-black text-[#1a1d2e] group-hover:text-[#e55a8a] transition-colors tracking-tight">
               Saved Wishlist
             </h2>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Keep your grails saved in one interactive board. Move items directly to bag with 1 click.
             </p>
           </div>
 
-          <div className="mt-5 pt-3 border-t border-[#232d3b] flex items-center justify-between text-xs font-bold text-red-400">
+          <div className="mt-5 pt-3 border-t border-[#e2e6f0] flex items-center justify-between text-xs font-bold text-[#e55a8a]">
             <span>Open Saved Items</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </div>
@@ -158,24 +158,24 @@ const Products = () => {
           className="bento-3d p-6 cursor-pointer flex flex-col justify-between group relative overflow-hidden border-[#84cc16]/40"
         >
           <div className="flex items-start justify-between mb-4">
-            <span className="bg-[#84cc16]/20 border border-[#84cc16]/40 text-[#a3e635] px-3 py-1 rounded-full text-[10px] font-black uppercase">
+            <span className="bg-[#eef1ff] border border-[#c7d0f0] text-[#4a4cdf] px-3 py-1 rounded-full text-[10px] font-black uppercase">
               🛍️ Active Bag
             </span>
-            <span className="bg-[#84cc16] text-black font-black text-xs px-2.5 py-0.5 rounded-full shadow-sm">
+            <span className="bg-[#4a4cdf] text-white font-black text-xs px-2.5 py-0.5 rounded-full shadow-sm">
               {cartCount} items
             </span>
           </div>
 
           <div>
-            <h2 className="text-2xl font-black text-white group-hover:text-[#bef264] transition-colors tracking-tight">
+            <h2 className="text-2xl font-black text-[#1a1d2e] group-hover:text-[#4a4cdf] transition-colors tracking-tight">
               Express Bag
             </h2>
-            <p className="text-xs text-gray-400 mt-1">
-              Current Subtotal: <strong className="text-white text-sm">₹{subtotal.toLocaleString('en-IN')}</strong>. Free express dispatch enabled.
+            <p className="text-xs text-slate-500 mt-1">
+              Current Subtotal: <strong className="text-[#1a1d2e] text-sm">₹{subtotal.toLocaleString('en-IN')}</strong>. Free express dispatch enabled.
             </p>
           </div>
 
-          <div className="mt-5 pt-3 border-t border-[#232d3b] flex items-center justify-between text-xs font-bold text-[#84cc16]">
+          <div className="mt-5 pt-3 border-t border-[#e2e6f0] flex items-center justify-between text-xs font-bold text-[#6069ef]">
             <span>Proceed to Checkout</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </div>
@@ -185,13 +185,13 @@ const Products = () => {
       {/* ── 3D Tactile Department Pills ── */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3 text-xs">
-          <span className="font-bold uppercase tracking-wider text-gray-400">
+          <span className="font-bold uppercase tracking-wider text-slate-400">
             Select Category Filter
           </span>
           {category !== 'All Drops' && (
             <button
               onClick={() => { setCategory('All Drops'); setSearchParams({}); }}
-              className="text-[#84cc16] hover:underline font-bold"
+              className="text-[#6069ef] hover:underline font-bold"
             >
               Reset filter
             </button>
@@ -207,7 +207,7 @@ const Products = () => {
             className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
               category === 'All Drops' || category === 'All Categories'
                 ? 'btn-3d-olive'
-                : 'btn-3d-dark text-gray-300'
+                : 'btn-3d-dark'
             }`}
           >
             🔥 All Drops
@@ -223,7 +223,7 @@ const Products = () => {
               className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
                 category === cat
                   ? 'btn-3d-olive'
-                  : 'btn-3d-dark text-gray-300'
+                  : 'btn-3d-dark'
               }`}
             >
               {cat === 'Streetwear & Kicks' && '👟 '}
@@ -242,29 +242,29 @@ const Products = () => {
       </div>
 
       {/* Subheader: Results count & Sort control */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 mb-6 border-b border-[#1c232d] text-xs">
-        <div className="text-gray-300">
-          Showing <span className="font-bold text-[#84cc16]">{sortedProducts.length}</span> pieces in{' '}
-          <strong className="text-white">"{category}"</strong>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 mb-6 border-b border-[#e2e6f0] text-xs">
+        <div className="text-slate-500">
+          Showing <span className="font-bold text-[#6069ef]">{sortedProducts.length}</span> pieces in{' '}
+          <strong className="text-[#1a1d2e]">"{category}"</strong>
         </div>
 
         <div className="flex items-center gap-4 self-end sm:self-auto">
-          <label className="flex items-center gap-1.5 cursor-pointer text-gray-300 hover:text-white">
+          <label className="flex items-center gap-1.5 cursor-pointer text-slate-500 hover:text-[#1a1d2e]">
             <input
               type="checkbox"
               checked={inStockOnly}
               onChange={(e) => setInStockOnly(e.target.checked)}
-              className="accent-[#84cc16] rounded"
+              className="accent-[#6069ef] rounded"
             />
             <span className="text-xs font-semibold">In Stock Only</span>
           </label>
 
           <div className="flex items-center gap-1.5">
-            <span className="text-gray-400">Sort:</span>
+            <span className="text-slate-400">Sort:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-[#11161e] border border-[#232c3a] rounded-lg text-xs text-white px-3 py-1.5 focus:outline-none focus:border-[#84cc16]"
+              className="bg-white border border-[#e2e6f0] rounded-lg text-xs text-[#1a1d2e] px-3 py-1.5 focus:outline-none focus:border-[#6069ef] shadow-sm"
             >
               <option value="featured">Featured Drops</option>
               <option value="price_asc">Price: Low to High</option>
@@ -284,8 +284,8 @@ const Products = () => {
       ) : error ? (
         <div className="bento-3d p-8 text-center max-w-lg mx-auto">
           <div className="text-3xl mb-3">⚠️</div>
-          <h3 className="text-lg font-bold text-white mb-2">Error loading drops</h3>
-          <p className="text-gray-400 text-xs mb-4">{error}</p>
+          <h3 className="text-lg font-bold text-[#1a1d2e] mb-2">Error loading drops</h3>
+          <p className="text-slate-400 text-xs mb-4">{error}</p>
           <button 
             onClick={fetchProducts} 
             className="btn-3d-olive px-6 py-2.5 text-xs"
@@ -296,8 +296,8 @@ const Products = () => {
       ) : sortedProducts.length === 0 ? (
         <div className="bento-3d p-12 text-center max-w-lg mx-auto">
           <div className="text-4xl mb-3 animate-float-3d">🔍</div>
-          <h3 className="text-xl font-bold text-white mb-2">No vibe matches found</h3>
-          <p className="text-gray-400 text-xs mb-6">
+          <h3 className="text-xl font-bold text-[#1a1d2e] mb-2">No vibe matches found</h3>
+          <p className="text-slate-400 text-xs mb-6">
             We couldn't find any drops matching "{search || category}". Try resetting filters or search something else.
           </p>
           <button 

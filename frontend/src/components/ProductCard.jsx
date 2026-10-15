@@ -62,8 +62,8 @@ const ProductCard = ({ product }) => {
         aria-label="Wishlist"
         className={`absolute top-3 right-3 z-10 w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
           wishlistState === 'added'
-            ? 'bg-red-500/20 border border-red-500/40 text-red-400 shadow-[0_3px_0_#7f1d1d]'
-            : 'bg-[#151a23] border border-[#273243] text-gray-400 hover:text-white shadow-[0_3px_0_#0d1117] hover:scale-105'
+            ? 'bg-[#fce8f0] border border-[#f4a0c0] text-[#e55a8a] shadow-[0_3px_0_#e55a8a]'
+            : 'bg-white border border-[#e4e9f8] text-slate-400 hover:text-[#e55a8a] hover:border-[#f4a0c0] shadow-[0_3px_0_#c7d0f0] hover:scale-105'
         }`}
       >
         <svg className={`w-4 h-4 ${wishlistState === 'added' ? 'fill-current animate-spring' : 'fill-none'}`} stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +74,7 @@ const ProductCard = ({ product }) => {
       {/* Product Image Frame with 3D Depth */}
       <Link 
         to={`/products/${product._id}`} 
-        className="bg-[#12161f] p-6 h-56 flex items-center justify-center overflow-hidden cursor-pointer relative border-b border-[#1c232d]"
+        className="bg-[#f0f4ff] p-6 h-56 flex items-center justify-center overflow-hidden cursor-pointer relative border-b border-[#e4e9f8]"
       >
         <img
           src={product.image}
@@ -87,14 +87,14 @@ const ProductCard = ({ product }) => {
       {/* Card Body */}
       <div className="p-5 flex flex-col flex-1">
         {/* Category */}
-        <span className="text-[10px] font-black uppercase tracking-wider text-[#84cc16] mb-1">
+        <span className="text-[10px] font-black uppercase tracking-wider text-[#6069ef] mb-1">
           {product.category}
         </span>
 
         {/* Product Title */}
         <Link
           to={`/products/${product._id}`}
-          className="text-sm font-bold text-white hover:text-[#bef264] line-clamp-2 leading-snug mb-3 transition-colors"
+          className="text-sm font-bold text-[#1a1d2e] hover:text-[#4a4cdf] line-clamp-2 leading-snug mb-3 transition-colors"
           title={product.name}
         >
           {product.name}
@@ -103,10 +103,10 @@ const ProductCard = ({ product }) => {
         {/* Price & Currency Display */}
         <div className="flex items-baseline justify-between mb-4 mt-auto">
           <div>
-            <span className="text-xl font-black text-white">
+            <span className="text-xl font-black text-[#1a1d2e]">
               ₹{product.price.toLocaleString('en-IN')}
             </span>
-            <span className="text-[10px] text-gray-400 block -mt-0.5">
+            <span className="text-[10px] text-slate-400 block -mt-0.5">
               free 24h dispatch
             </span>
           </div>
@@ -121,7 +121,7 @@ const ProductCard = ({ product }) => {
         {/* Feedback message */}
         {cartFeedback && (
           <div className={`mb-2 text-[11px] font-bold text-center py-1 rounded-lg ${
-            cartFeedback.type === 'error' ? 'bg-red-950/50 text-red-300' : 'bg-[#84cc16]/20 text-[#bef264]'
+            cartFeedback.type === 'error' ? 'bg-red-50 text-red-500' : 'bg-[#eef1ff] text-[#4a4cdf]'
           }`}>
             {cartFeedback.message}
           </div>
@@ -133,7 +133,7 @@ const ProductCard = ({ product }) => {
           disabled={isOutOfStock || isAddingToCart || cartQty >= product.stock}
           className={`w-full py-2.5 px-4 text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
             isOutOfStock || cartQty >= product.stock
-              ? 'bg-[#161c24] text-gray-500 border border-[#232c3a] cursor-not-allowed'
+              ? 'bg-[#f0f2f8] text-slate-400 border border-[#e2e6f0] cursor-not-allowed rounded-xl'
               : isAddingToCart
               ? 'btn-3d-olive opacity-80 cursor-wait'
               : 'btn-3d-olive'

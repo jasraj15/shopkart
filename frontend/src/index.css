@@ -1,30 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  --color-olive-50: #f7fee7;
-  --color-olive-100: #ecfccb;
-  --color-olive-200: #d9f99d;
-  --color-olive-300: #bef264;
-  --color-olive-400: #a3e635;
-  --color-olive-500: #84cc16;
-  --color-olive-600: #65a30d;
-  --color-olive-700: #4d7c0f;
-  --color-olive-800: #3f6212;
-  --color-olive-900: #365314;
-  --color-olive-dark: #1e2816;
-  
-  --color-bg-deep: #08090c;
-  --color-bg-surface: #0f1217;
-  --color-bg-card: #151a21;
-  --color-bg-card-hover: #1c232d;
-  --color-border-3d: #252e3b;
-  --color-border-olive: #3b5025;
+  /* ── Primary Accent: Slate Blue / Steel Indigo ── */
+  --color-primary-50:  #f0f4ff;
+  --color-primary-100: #e0eaff;
+  --color-primary-200: #c7d8ff;
+  --color-primary-300: #a5bafd;
+  --color-primary-400: #8295f8;
+  --color-primary-500: #6069ef;
+  --color-primary-600: #4a4cdf;
+  --color-primary-700: #3d3dc5;
+  --color-primary-800: #3232a0;
+
+  /* ── Subtle Blush Pink (accent only) ── */
+  --color-blush-100: #fce8f0;
+  --color-blush-200: #f9c8db;
+  --color-blush-300: #f4a0c0;
+  --color-blush-400: #ee7da4;
+  --color-blush-500: #e55a8a;
+
+  /* ── Neutral Backgrounds (bright & clean) ── */
+  --color-bg-deep:        #f5f6fa;
+  --color-bg-surface:     #ffffff;
+  --color-bg-card:        #ffffff;
+  --color-bg-card-hover:  #f8f9ff;
+  --color-border-3d:      #e2e6f0;
+  --color-border-primary: #c7d0f0;
 }
 
 @layer base {
   body {
-    background-color: #08090c;
-    color: #f1f5f9;
+    background-color: #f5f6fa;
+    color: #1a1d2e;
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -36,15 +43,14 @@
     height: 7px;
   }
   ::-webkit-scrollbar-track {
-    background: #08090c;
+    background: #f0f2f8;
   }
   ::-webkit-scrollbar-thumb {
-    background: #252e3b;
+    background: #c7d0f0;
     border-radius: 4px;
-    border: 1px solid #151a21;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #65a30d;
+    background: #6069ef;
   }
 }
 
@@ -76,19 +82,19 @@
 
   /* ── 3D Bento Box Card ── */
   .bento-3d {
-    background: linear-gradient(145deg, #131820, #0c0f14);
-    border: 1px solid #232d3b;
-    border-bottom: 4px solid #161d27;
-    border-right: 2px solid #1a222e;
+    background: linear-gradient(145deg, #ffffff, #f0f4ff);
+    border: 1px solid #dde4f8;
+    border-bottom: 4px solid #c7d0f0;
+    border-right: 2px solid #d5dcf5;
     border-radius: 1.25rem;
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px -10px rgba(96,105,239,0.10), 0 2px 8px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9);
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .bento-3d:hover {
     transform: translateY(-4px);
-    border-color: #65a30d;
-    border-bottom-color: #4d7c0f;
-    box-shadow: 0 16px 36px -8px rgba(101, 163, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-color: #8295f8;
+    border-bottom-color: #6069ef;
+    box-shadow: 0 16px 36px -8px rgba(96,105,239,0.20), inset 0 1px 0 rgba(255,255,255,1);
   }
   .bento-3d:active {
     transform: translateY(1px);
@@ -97,100 +103,108 @@
 
   /* ── 3D Product Card ── */
   .card-3d {
-    background: #0f131a;
-    border: 1px solid #222b38;
-    border-bottom: 4px solid #151b24;
+    background: #ffffff;
+    border: 1px solid #e4e9f8;
+    border-bottom: 4px solid #c7d0f0;
     border-radius: 1.25rem;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 24px -6px rgba(96,105,239,0.10), 0 2px 6px -1px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .card-3d:hover {
     transform: translateY(-4px);
-    border-color: #3f5530;
-    border-bottom-color: #65a30d;
-    box-shadow: 0 18px 35px -8px rgba(0, 0, 0, 0.7), 0 0 20px rgba(132, 204, 22, 0.1);
+    border-color: #a5bafd;
+    border-bottom-color: #6069ef;
+    box-shadow: 0 18px 40px -8px rgba(96,105,239,0.18), 0 4px 10px -2px rgba(229,90,138,0.06);
   }
 
   /* ── Tactile 3D Buttons ── */
-  /* 1. Olive Green 3D Button */
+  /* 1. Primary Indigo/Steel 3D Button */
   .btn-3d-olive {
-    background: linear-gradient(180deg, #84cc16 0%, #65a30d 100%);
-    color: #08090c;
+    background: linear-gradient(180deg, #6e78f0 0%, #4a4cdf 100%);
+    color: #ffffff;
     font-weight: 800;
     border-radius: 0.85rem;
-    border: 1px solid #a3e635;
-    border-bottom: 4px solid #3f6212;
-    box-shadow: 0 4px 14px rgba(101, 163, 13, 0.3);
+    border: 1px solid #8295f8;
+    border-bottom: 4px solid #3232a0;
+    box-shadow: 0 4px 14px rgba(74,76,223,0.28);
     transition: all 0.15s ease;
   }
   .btn-3d-olive:hover {
-    background: linear-gradient(180deg, #9ae62e 0%, #70b310 100%);
-    box-shadow: 0 6px 20px rgba(101, 163, 13, 0.45);
+    background: linear-gradient(180deg, #7b84f5 0%, #5658e8 100%);
+    box-shadow: 0 6px 20px rgba(74,76,223,0.38);
     transform: translateY(-1px);
   }
   .btn-3d-olive:active {
     transform: translateY(3px);
     border-bottom-width: 1px;
-    box-shadow: 0 1px 4px rgba(101, 163, 13, 0.2);
+    box-shadow: 0 1px 4px rgba(74,76,223,0.2);
   }
 
-  /* 2. Dark Slate 3D Button */
+  /* 2. Light Steel Secondary 3D Button */
   .btn-3d-dark {
-    background: linear-gradient(180deg, #1f2733 0%, #151a23 100%);
-    color: #f1f5f9;
+    background: linear-gradient(180deg, #ffffff 0%, #eef1ff 100%);
+    color: #3d3dc5;
     font-weight: 700;
     border-radius: 0.85rem;
-    border: 1px solid #303d4f;
-    border-bottom: 4px solid #0d1117;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid #c7d0f0;
+    border-bottom: 4px solid #a5bafd;
+    box-shadow: 0 4px 12px rgba(96,105,239,0.10);
     transition: all 0.15s ease;
   }
   .btn-3d-dark:hover {
-    background: linear-gradient(180deg, #273140 0%, #1a212c 100%);
-    border-color: #43556e;
+    background: linear-gradient(180deg, #f0f4ff 0%, #e0eaff 100%);
+    border-color: #8295f8;
     transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(96,105,239,0.16);
   }
   .btn-3d-dark:active {
     transform: translateY(3px);
     border-bottom-width: 1px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 4px rgba(96,105,239,0.12);
   }
 
-  /* 3. Pure Pearl White 3D Button */
+  /* 3. Blush Pink 3D Button (wishlist/heart) */
   .btn-3d-white {
-    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
-    color: #08090c;
+    background: linear-gradient(180deg, #fff0f5 0%, #fce8f0 100%);
+    color: #c23070;
     font-weight: 800;
     border-radius: 0.85rem;
-    border: 1px solid #ffffff;
-    border-bottom: 4px solid #94a3b8;
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+    border: 1px solid #f4a0c0;
+    border-bottom: 4px solid #e55a8a;
+    box-shadow: 0 4px 12px rgba(229,90,138,0.15);
     transition: all 0.15s ease;
   }
   .btn-3d-white:hover {
-    background: #ffffff;
+    background: linear-gradient(180deg, #fce8f0 0%, #f9c8db 100%);
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.25);
+    box-shadow: 0 6px 16px rgba(229,90,138,0.25);
   }
   .btn-3d-white:active {
     transform: translateY(3px);
     border-bottom-width: 1px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 4px rgba(229,90,138,0.12);
   }
 
-  /* Olive Badge Pill */
+  /* Badge Pill */
   .badge-olive {
-    background: rgba(132, 204, 22, 0.12);
-    border: 1px solid rgba(132, 204, 22, 0.3);
-    color: #a3e635;
+    background: rgba(96, 105, 239, 0.10);
+    border: 1px solid rgba(96, 105, 239, 0.25);
+    color: #4a4cdf;
     font-weight: 800;
     letter-spacing: 0.05em;
   }
 
-  /* Gradient Text: Olive to Lime to Pearl White */
+  /* Gradient Text */
   .text-olive-gradient {
-    background: linear-gradient(135deg, #ffffff 20%, #bef264 60%, #84cc16 100%);
+    background: linear-gradient(135deg, #3232a0 10%, #6069ef 55%, #ee7da4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton-shimmer {
+    background: linear-gradient(90deg, #eef1ff 25%, #e0eaff 50%, #eef1ff 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite linear;
   }
 }
